@@ -25,6 +25,14 @@ func TestResolveRealBinary(t *testing.T) {
 				return dir, "/shim"
 			},
 		},
+		{
+			name:    "no match found",
+			binary:  "git",
+			wantErr: true,
+			setup: func(t *testing.T) (string, string) {
+				return t.TempDir(), "/shim"
+			},
+		},
 	}
 
 	for _, tt := range tests {
