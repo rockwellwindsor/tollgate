@@ -7,10 +7,10 @@ import (
 )
 
 func ResolveRealBinary(name, skipDir string) (string, error) {
-	skip := filepath.Clean(skipDir)
+	skip := cleanPath(skipDir)
 
 	for _, dir := range filepath.SplitList(os.Getenv("PATH")) {
-		if filepath.Clean(dir) == skip {
+		if cleanPath(dir) == skip {
 			continue
 		}
 		candidate := filepath.Join(dir, name)
@@ -20,6 +20,10 @@ func ResolveRealBinary(name, skipDir string) (string, error) {
 	}
 
 	return "", fmt.Errorf("no real %q found on PATH", name)
+}
+
+func cleanPath(p string) string {
+	return filepath.Clean(p)
 }
 
 func isExecutable(path string) bool {
