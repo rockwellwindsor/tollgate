@@ -66,6 +66,14 @@ func TestResolveRealBinary(t *testing.T) {
 				return pathEnv, shimDir
 			},
 		},
+		{
+			name:    "binary with relative path entries",
+			binary:  "git",
+			wantErr: true,
+			setup: func(t *testing.T) (string, string) {
+				return "relative/bin:../other/bin", "/shim"
+			},
+		},
 	}
 
 	for _, tt := range tests {
