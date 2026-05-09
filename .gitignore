@@ -1,0 +1,16 @@
+# binaries
+bin/
+
+# build output
+dist/
+
+# coverage
+coverage.out
+coverage.html
+
+# os
+.DS_Store
+
+CLAUDE.md
+PLAN.md
+EXECUTION.md
