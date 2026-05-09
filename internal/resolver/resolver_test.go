@@ -49,6 +49,23 @@ func TestResolveRealBinary(t *testing.T) {
 				return pathEnv, shimDir
 			},
 		},
+		{
+			name:   "shim dir multiple times",
+			binary: "git",
+			setup: func(t *testing.T) (string, string) {
+				shimDir := t.TempDir()
+				realDir := t.TempDir()
+				for _, dir := range []string{shimDir, realDir} {
+					path := filepath.Join(dir, "git")
+					if err := os.WriteFile(path, []byte("#!/bin/sh"), 0755); err != nil {
+						t.Fatal(err)
+					}
+				}
+				sep := string(os.PathListSeparator)
+				pathEnv := shimDir + sep + shimDir + sep + realDir + sep + shimDir
+				return pathEnv, shimDir
+			},
+		},
 	}
 
 	for _, tt := range tests {
