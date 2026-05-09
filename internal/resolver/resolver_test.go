@@ -33,6 +33,22 @@ func TestResolveRealBinary(t *testing.T) {
 				return t.TempDir(), "/shim"
 			},
 		},
+		{
+			name:   "shim dir at start of PATH",
+			binary: "git",
+			setup: func(t *testing.T) (string, string) {
+				shimDir := t.TempDir()
+				realDir := t.TempDir()
+				for _, dir := range []string{shimDir, realDir} {
+					path := filepath.Join(dir, "git")
+					if err := os.WriteFile(path, []byte("#!/bin/sh"), 0755); err != nil {
+						t.Fatal(err)
+					}
+				}
+				pathEnv := shimDir + string(os.PathListSeparator) + realDir
+				return pathEnv, shimDir
+			},
+		},
 	}
 
 	for _, tt := range tests {
