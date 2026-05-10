@@ -21,6 +21,12 @@ func TestDecide(t *testing.T) {
 			env:   Env{},
 			want:  AllowSilent,
 		},
+		{
+			name:  "match + global on + no session allow → Prompt",
+			state: State{GlobalEnabled: true, DefaultAction: "prompt"},
+			env:   Env{},
+			want:  Prompt,
+		},
 	}
 
 	for _, tt := range tests {
