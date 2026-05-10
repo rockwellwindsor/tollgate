@@ -43,7 +43,14 @@ func newOnCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "on",
 		Short: "Enable tollgate globally",
-		RunE:  func(cmd *cobra.Command, args []string) error { return nil },
+		RunE: func(cmd *cobra.Command, args []string) error {
+			mgr := state.NewManager(state.DefaultDir())
+			if err := mgr.SetGlobalOn(); err != nil {
+				return err
+			}
+			fmt.Fprintln(cmd.OutOrStdout(), "tollgate: enabled")
+			return nil
+		},
 	}
 }
 

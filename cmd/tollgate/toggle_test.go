@@ -7,6 +7,28 @@ import (
 	"github.com/rockwellwindsor/tollgate/internal/state"
 )
 
+func TestOn_SetsGlobalOn(t *testing.T) {
+	dir := t.TempDir()
+	mgr := state.NewManager(dir)
+	if err := mgr.SetGlobalOff(); err != nil {
+		t.Fatalf("SetGlobalOff error = %v", err)
+	}
+	t.Setenv("TOLLGATE_HOME", dir)
+
+	cmd := newOnCmd()
+	if err := cmd.RunE(cmd, []string{}); err != nil {
+		t.Fatalf("on RunE error = %v", err)
+	}
+
+	on, err := mgr.IsGlobalOn()
+	if err != nil {
+		t.Fatalf("IsGlobalOn error = %v", err)
+	}
+	if !on {
+		t.Error("expected global to be on after tollgate on")
+	}
+}
+
 func TestOff_SetsGlobalOff(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("TOLLGATE_HOME", dir)
