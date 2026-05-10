@@ -51,6 +51,13 @@ func newOffCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "off",
 		Short: "Disable tollgate globally",
-		RunE:  func(cmd *cobra.Command, args []string) error { return nil },
+		RunE: func(cmd *cobra.Command, args []string) error {
+			mgr := state.NewManager(state.DefaultDir())
+			if err := mgr.SetGlobalOff(); err != nil {
+				return err
+			}
+			fmt.Fprintln(cmd.OutOrStdout(), "tollgate: disabled")
+			return nil
+		},
 	}
 }
