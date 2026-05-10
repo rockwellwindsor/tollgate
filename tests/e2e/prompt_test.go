@@ -11,20 +11,25 @@ import (
 	"github.com/rockwellwindsor/tollgate/internal/testkit"
 )
 
-func TestPrompt_AllowSessionInvokesFakeGitAndRecordsAllow(t *testing.T) {
-	home := testkit.TempHome(t)
-
-	realDir := t.TempDir()
-	argsFile := filepath.Join(home, "git-args")
-	testkit.FakeBinary(t, realDir, "git", `echo "$@" > `+argsFile)
-
+func newShimCmd(t *testing.T, home, realDir string, args ...string) *exec.Cmd {
+	t.Helper()
 	shimDir := filepath.Dir(shimGitPath)
-	cmd := exec.Command(shimGitPath, "push", "origin", "main")
+	cmd := exec.Command(shimGitPath, args...)
 	cmd.Env = append(os.Environ(),
 		"PATH="+shimDir+string(os.PathListSeparator)+realDir,
 		"HOME="+home,
 		"TOLLGATE_HOME="+home,
 	)
+	return cmd
+}
+
+func TestPrompt_AllowSessionInvokesFakeGitAndRecordsAllow(t *testing.T) {
+	home := testkit.TempHome(t)
+	realDir := t.TempDir()
+	argsFile := filepath.Join(home, "git-args")
+	testkit.FakeBinary(t, realDir, "git", `echo "$@" > `+argsFile)
+
+	cmd := newShimCmd(t, home, realDir, "push", "origin", "main")
 	cmd.Stdin = strings.NewReader("a")
 
 	if err := cmd.Run(); err != nil {
@@ -51,7 +56,6 @@ func TestPrompt_AllowSessionInvokesFakeGitAndRecordsAllow(t *testing.T) {
 
 func TestPrompt_SessionAllowSkipsPrompt(t *testing.T) {
 	home := testkit.TempHome(t)
-
 	realDir := t.TempDir()
 	argsFile := filepath.Join(home, "git-args")
 	testkit.FakeBinary(t, realDir, "git", `echo "$@" > `+argsFile)
@@ -61,13 +65,7 @@ func TestPrompt_SessionAllowSkipsPrompt(t *testing.T) {
 		t.Fatalf("AllowForSession() error = %v", err)
 	}
 
-	shimDir := filepath.Dir(shimGitPath)
-	cmd := exec.Command(shimGitPath, "push", "origin", "main")
-	cmd.Env = append(os.Environ(),
-		"PATH="+shimDir+string(os.PathListSeparator)+realDir,
-		"HOME="+home,
-		"TOLLGATE_HOME="+home,
-	)
+	cmd := newShimCmd(t, home, realDir, "push", "origin", "main")
 	// no stdin — if shim tries to prompt it will error and exit non-zero
 
 	if err := cmd.Run(); err != nil {
@@ -85,19 +83,12 @@ func TestPrompt_SessionAllowSkipsPrompt(t *testing.T) {
 
 func TestPrompt_TollgateOffBypassesEverything(t *testing.T) {
 	home := testkit.TempHome(t)
-
 	realDir := t.TempDir()
 	argsFile := filepath.Join(home, "git-args")
 	testkit.FakeBinary(t, realDir, "git", `echo "$@" > `+argsFile)
 
-	shimDir := filepath.Dir(shimGitPath)
-	cmd := exec.Command(shimGitPath, "push", "origin", "main")
-	cmd.Env = append(os.Environ(),
-		"PATH="+shimDir+string(os.PathListSeparator)+realDir,
-		"HOME="+home,
-		"TOLLGATE_HOME="+home,
-		"TOLLGATE=off",
-	)
+	cmd := newShimCmd(t, home, realDir, "push", "origin", "main")
+	cmd.Env = append(cmd.Env, "TOLLGATE=off")
 	// no stdin — bypass must happen before any prompt attempt
 
 	if err := cmd.Run(); err != nil {
@@ -115,18 +106,11 @@ func TestPrompt_TollgateOffBypassesEverything(t *testing.T) {
 
 func TestPrompt_NoDeniesAndExitsNonZero(t *testing.T) {
 	home := testkit.TempHome(t)
-
 	realDir := t.TempDir()
 	argsFile := filepath.Join(home, "git-args")
 	testkit.FakeBinary(t, realDir, "git", `echo "$@" > `+argsFile)
 
-	shimDir := filepath.Dir(shimGitPath)
-	cmd := exec.Command(shimGitPath, "push", "origin", "main")
-	cmd.Env = append(os.Environ(),
-		"PATH="+shimDir+string(os.PathListSeparator)+realDir,
-		"HOME="+home,
-		"TOLLGATE_HOME="+home,
-	)
+	cmd := newShimCmd(t, home, realDir, "push", "origin", "main")
 	cmd.Stdin = strings.NewReader("n")
 
 	err := cmd.Run()
@@ -141,18 +125,11 @@ func TestPrompt_NoDeniesAndExitsNonZero(t *testing.T) {
 
 func TestPrompt_YesInvokesFakeGit(t *testing.T) {
 	home := testkit.TempHome(t)
-
 	realDir := t.TempDir()
 	argsFile := filepath.Join(home, "git-args")
 	testkit.FakeBinary(t, realDir, "git", `echo "$@" > `+argsFile)
 
-	shimDir := filepath.Dir(shimGitPath)
-	cmd := exec.Command(shimGitPath, "push", "origin", "main")
-	cmd.Env = append(os.Environ(),
-		"PATH="+shimDir+string(os.PathListSeparator)+realDir,
-		"HOME="+home,
-		"TOLLGATE_HOME="+home,
-	)
+	cmd := newShimCmd(t, home, realDir, "push", "origin", "main")
 	cmd.Stdin = strings.NewReader("y")
 
 	if err := cmd.Run(); err != nil {
