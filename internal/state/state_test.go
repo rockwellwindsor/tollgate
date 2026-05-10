@@ -18,6 +18,15 @@ func TestIsGlobalOn_DefaultTrue(t *testing.T) {
 	}
 }
 
+func TestDefaultDir_RespectsTollgateHome(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("TOLLGATE_HOME", dir)
+
+	if got := DefaultDir(); got != dir {
+		t.Errorf("DefaultDir() = %q, want %q", got, dir)
+	}
+}
+
 func TestAllowForSession_SubsequentCallSees(t *testing.T) {
 	m := NewManager(t.TempDir())
 	pid := os.Getpid()

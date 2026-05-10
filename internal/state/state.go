@@ -18,6 +18,13 @@ func NewManager(dir string) *Manager {
 	return &Manager{dir: dir}
 }
 
+func DefaultDir() string {
+	if home := os.Getenv("TOLLGATE_HOME"); home != "" {
+		return home
+	}
+	return filepath.Join(os.Getenv("HOME"), ".tollgate")
+}
+
 func (m *Manager) IsGlobalOn() (bool, error) {
 	_, err := os.Stat(filepath.Join(m.dir, "disabled"))
 	if errors.Is(err, os.ErrNotExist) {
