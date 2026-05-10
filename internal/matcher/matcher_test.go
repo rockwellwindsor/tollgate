@@ -21,6 +21,12 @@ func TestMatch(t *testing.T) {
 			wantMatched: true,
 			wantPattern: "git-push",
 		},
+		{
+			name:        "git status not matched",
+			binary:      "git",
+			args:        []string{"status"},
+			wantMatched: false,
+		},
 	}
 
 	for _, tt := range tests {
