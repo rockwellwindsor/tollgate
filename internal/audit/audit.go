@@ -1,8 +1,8 @@
 package audit
 
 import (
+	"bufio"
 	"encoding/json"
-	"errors"
 	"os"
 	"path/filepath"
 )
@@ -33,5 +33,20 @@ func Write(path string, entry Entry) error {
 }
 
 func Read(path string) ([]Entry, error) {
-	return nil, errors.New("not implemented")
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	var entries []Entry
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		var e Entry
+		if err := json.Unmarshal(scanner.Bytes(), &e); err != nil {
+			return nil, err
+		}
+		entries = append(entries, e)
+	}
+	return entries, scanner.Err()
 }

@@ -77,6 +77,35 @@ func TestWrite_CreatesDirectoryIfMissing(t *testing.T) {
 	}
 }
 
+func TestRead_ReturnsParsedEntries(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "audit.log")
+
+	want := []Entry{
+		{Binary: "git", Args: []string{"push"}, Pattern: "git-push", Decision: "allowed-once"},
+		{Binary: "gh", Args: []string{"pr", "create"}, Pattern: "gh-pr-create", Decision: "denied"},
+	}
+	for _, e := range want {
+		if err := Write(path, e); err != nil {
+			t.Fatalf("Write() error = %v", err)
+		}
+	}
+
+	got, err := Read(path)
+	if err != nil {
+		t.Fatalf("Read() error = %v", err)
+	}
+	if len(got) != len(want) {
+		t.Fatalf("got %d entries, want %d", len(got), len(want))
+	}
+	for i, g := range got {
+		w := want[i]
+		if g.Binary != w.Binary || g.Pattern != w.Pattern || g.Decision != w.Decision {
+			t.Errorf("entry %d: got %+v, want %+v", i, g, w)
+		}
+	}
+}
+
 func TestWrite_ConcurrentWritesProduceValidLines(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "audit.log")
