@@ -32,6 +32,28 @@ func newShimGhCmd(t *testing.T, home, realDir string, args ...string) *exec.Cmd 
 	return cmd
 }
 
+func TestGhShim_RepoDelete_Prompts(t *testing.T) {
+	home := testkit.TempHome(t)
+	realDir := t.TempDir()
+	argsFile := filepath.Join(home, "gh-args")
+	testkit.FakeBinary(t, realDir, "gh", `echo "$@" > `+argsFile)
+
+	cmd := newShimGhCmd(t, home, realDir, "repo", "delete")
+	cmd.Stdin = strings.NewReader("y")
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("shim exited with error: %v", err)
+	}
+
+	got, err := os.ReadFile(argsFile)
+	if err != nil {
+		t.Fatalf("fake gh was never called — args file not found: %v", err)
+	}
+	if want := "repo delete"; strings.TrimSpace(string(got)) != want {
+		t.Errorf("fake gh args = %q, want %q", strings.TrimSpace(string(got)), want)
+	}
+}
+
 func TestGhShim_PrList_PassesThrough(t *testing.T) {
 	home := testkit.TempHome(t)
 	realDir := t.TempDir()
