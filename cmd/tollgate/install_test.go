@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -16,6 +17,27 @@ func fakeShimSrcDir(t *testing.T) string {
 		}
 	}
 	return dir
+}
+
+func TestInstall_PrintsPathInstructions(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("TOLLGATE_HOME", home)
+	srcDir := fakeShimSrcDir(t)
+
+	cmd := newInstallCmd()
+	buf := &bytes.Buffer{}
+	cmd.SetOut(buf)
+	if err := install(cmd, srcDir); err != nil {
+		t.Fatalf("install error = %v", err)
+	}
+
+	out := buf.String()
+	if !strings.Contains(out, "PATH") {
+		t.Errorf("install output %q does not mention PATH", out)
+	}
+	if !strings.Contains(out, filepath.Join(home, "bin")) {
+		t.Errorf("install output %q does not contain bin dir path", out)
+	}
 }
 
 func TestInstall_LeavesExistingConfigAlone(t *testing.T) {
