@@ -22,7 +22,8 @@ func newStatusCmd() *cobra.Command {
 }
 
 func runStatusCmd(cmd *cobra.Command, _ []string) error {
-	mgr := state.NewManager(state.DefaultDir())
+	dir := state.DefaultDir()
+	mgr := state.NewManager(dir)
 
 	on, err := mgr.IsGlobalOn()
 	if err != nil {
@@ -50,7 +51,7 @@ func runStatusCmd(cmd *cobra.Command, _ []string) error {
 		fmt.Fprintf(cmd.OutOrStdout(), "session allow: %s\n", p)
 	}
 
-	logPath := filepath.Join(state.DefaultDir(), "audit.log")
+	logPath := filepath.Join(dir, "audit.log")
 	entries, err := audit.Read(logPath)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
