@@ -49,6 +49,40 @@ func TestPrompt_AllowSessionInvokesFakeGitAndRecordsAllow(t *testing.T) {
 	}
 }
 
+func TestPrompt_SessionAllowSkipsPrompt(t *testing.T) {
+	home := testkit.TempHome(t)
+
+	realDir := t.TempDir()
+	argsFile := filepath.Join(home, "git-args")
+	testkit.FakeBinary(t, realDir, "git", `echo "$@" > `+argsFile)
+
+	mgr := state.NewManager(home)
+	if err := mgr.AllowForSession("git-push", os.Getpid()); err != nil {
+		t.Fatalf("AllowForSession() error = %v", err)
+	}
+
+	shimDir := filepath.Dir(shimGitPath)
+	cmd := exec.Command(shimGitPath, "push", "origin", "main")
+	cmd.Env = append(os.Environ(),
+		"PATH="+shimDir+string(os.PathListSeparator)+realDir,
+		"HOME="+home,
+		"TOLLGATE_HOME="+home,
+	)
+	// no stdin — if shim tries to prompt it will error and exit non-zero
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("shim exited with error: %v", err)
+	}
+
+	got, err := os.ReadFile(argsFile)
+	if err != nil {
+		t.Fatalf("fake git was never called — args file not found: %v", err)
+	}
+	if want := "push origin main"; strings.TrimSpace(string(got)) != want {
+		t.Errorf("fake git args = %q, want %q", strings.TrimSpace(string(got)), want)
+	}
+}
+
 func TestPrompt_NoDeniesAndExitsNonZero(t *testing.T) {
 	home := testkit.TempHome(t)
 
