@@ -20,6 +20,23 @@ func writeAuditLog(t *testing.T, dir string) string {
 	return logPath
 }
 
+func TestClearLogs_PromptNoKeepsLog(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("TOLLGATE_HOME", dir)
+	logPath := writeAuditLog(t, dir)
+
+	cmd := newClearLogsCmd()
+	cmd.SetOut(&bytes.Buffer{})
+	cmd.SetIn(strings.NewReader("n\n"))
+	if err := cmd.RunE(cmd, []string{}); err != nil {
+		t.Fatalf("RunE error = %v", err)
+	}
+
+	if _, err := os.Stat(logPath); os.IsNotExist(err) {
+		t.Error("audit.log should not be deleted after answering n")
+	}
+}
+
 func TestClearLogs_PromptYesDeletesLog(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("TOLLGATE_HOME", dir)
