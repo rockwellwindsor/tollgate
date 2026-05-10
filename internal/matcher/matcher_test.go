@@ -9,6 +9,7 @@ var defaultPatterns = []Pattern{
 	{Name: "gh-pr-merge", Binary: "gh", Subcommand: "pr", RequiredArgs: []string{"merge"}},
 	{Name: "gh-repo-create", Binary: "gh", Subcommand: "repo", RequiredArgs: []string{"create"}},
 	{Name: "gh-repo-delete", Binary: "gh", Subcommand: "repo", RequiredArgs: []string{"delete"}},
+	{Name: "gh-release-create", Binary: "gh", Subcommand: "release", RequiredArgs: []string{"create"}},
 }
 
 func TestMatch(t *testing.T) {
@@ -58,6 +59,13 @@ func TestMatch(t *testing.T) {
 			args:        []string{"push", "origin", "--force", "main"},
 			wantMatched: true,
 			wantPattern: "git-push-force",
+		},
+		{
+			name:        "gh release create matched",
+			binary:      "gh",
+			args:        []string{"release", "create", "v1.0.0"},
+			wantMatched: true,
+			wantPattern: "gh-release-create",
 		},
 		{
 			name:        "gh repo delete matched",
