@@ -18,6 +18,23 @@ func fakeShimSrcDir(t *testing.T) string {
 	return dir
 }
 
+func TestInstall_WritesDefaultConfig(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("TOLLGATE_HOME", home)
+	srcDir := fakeShimSrcDir(t)
+
+	cmd := newInstallCmd()
+	cmd.SetOut(&bytes.Buffer{})
+	if err := install(cmd, srcDir); err != nil {
+		t.Fatalf("install error = %v", err)
+	}
+
+	configPath := filepath.Join(home, "config.json")
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		t.Error("expected config.json to be written by install")
+	}
+}
+
 func TestInstall_WritesShimsWithExecuteBits(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("TOLLGATE_HOME", home)
