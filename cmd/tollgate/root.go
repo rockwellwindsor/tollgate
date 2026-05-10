@@ -22,7 +22,7 @@ func newRootCmd() *cobra.Command {
 		newOnCmd(),
 		newOffCmd(),
 		newClearLogsCmd(),
-		&cobra.Command{Use: "install", Short: "Write shim binaries and config"},
+		newInstallCmd(),
 		&cobra.Command{Use: "config", Short: "Show or edit configuration"},
 	)
 
