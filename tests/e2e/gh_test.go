@@ -22,14 +22,7 @@ func init() {
 
 func newShimGhCmd(t *testing.T, home, realDir string, args ...string) *exec.Cmd {
 	t.Helper()
-	shimDir := filepath.Dir(shimGhPath)
-	cmd := exec.Command(shimGhPath, args...)
-	cmd.Env = append(os.Environ(),
-		"PATH="+shimDir+string(os.PathListSeparator)+realDir,
-		"HOME="+home,
-		"TOLLGATE_HOME="+home,
-	)
-	return cmd
+	return newShimCmdFor(t, shimGhPath, home, realDir, args...)
 }
 
 func TestGhShim_RepoDelete_Prompts(t *testing.T) {

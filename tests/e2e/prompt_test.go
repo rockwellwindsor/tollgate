@@ -13,14 +13,7 @@ import (
 
 func newShimCmd(t *testing.T, home, realDir string, args ...string) *exec.Cmd {
 	t.Helper()
-	shimDir := filepath.Dir(shimGitPath)
-	cmd := exec.Command(shimGitPath, args...)
-	cmd.Env = append(os.Environ(),
-		"PATH="+shimDir+string(os.PathListSeparator)+realDir,
-		"HOME="+home,
-		"TOLLGATE_HOME="+home,
-	)
-	return cmd
+	return newShimCmdFor(t, shimGitPath, home, realDir, args...)
 }
 
 func TestPrompt_AllowSessionInvokesFakeGitAndRecordsAllow(t *testing.T) {
