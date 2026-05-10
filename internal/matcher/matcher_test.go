@@ -5,6 +5,7 @@ import "testing"
 var defaultPatterns = []Pattern{
 	{Name: "git-push", Binary: "git", Subcommand: "push"},
 	{Name: "git-push-force", Binary: "git", Subcommand: "push", AnyOfArgs: []string{"--force", "-f"}},
+	{Name: "gh-pr-create", Binary: "gh", Subcommand: "pr", RequiredArgs: []string{"create"}},
 }
 
 func TestMatch(t *testing.T) {
@@ -34,6 +35,13 @@ func TestMatch(t *testing.T) {
 			args:        []string{"push", "--force", "origin", "main"},
 			wantMatched: true,
 			wantPattern: "git-push-force",
+		},
+		{
+			name:        "gh pr create matched",
+			binary:      "gh",
+			args:        []string{"pr", "create", "--title", "my pr"},
+			wantMatched: true,
+			wantPattern: "gh-pr-create",
 		},
 	}
 

@@ -1,10 +1,11 @@
 package matcher
 
 type Pattern struct {
-	Name       string
-	Binary     string
-	Subcommand string
-	AnyOfArgs  []string
+	Name         string
+	Binary       string
+	Subcommand   string
+	RequiredArgs []string
+	AnyOfArgs    []string
 }
 
 type MatchResult struct {
@@ -30,6 +31,9 @@ func Match(binary string, args []string, patterns []Pattern) MatchResult {
 			if len(p.AnyOfArgs) > 0 && !containsAny(args[1:], p.AnyOfArgs) {
 				continue
 			}
+			if !containsAll(args[1:], p.RequiredArgs) {
+				continue
+			}
 			return MatchResult{Matched: true, Pattern: p}
 		}
 	}
@@ -45,4 +49,20 @@ func containsAny(args, targets []string) bool {
 		}
 	}
 	return false
+}
+
+func containsAll(args, required []string) bool {
+	for _, r := range required {
+		found := false
+		for _, a := range args {
+			if a == r {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
 }
