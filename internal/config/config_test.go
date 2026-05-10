@@ -18,6 +18,17 @@ func TestLoad_MissingFile_ReturnsDefaults(t *testing.T) {
 	}
 }
 
+func TestDefaultPath_RespectsTollgateHome(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("TOLLGATE_HOME", dir)
+
+	got := DefaultPath()
+	want := filepath.Join(dir, "config.json")
+	if got != want {
+		t.Errorf("DefaultPath() = %q, want %q", got, want)
+	}
+}
+
 func TestLoad_MalformedJSON_ReturnsError(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.json")
 	if err := os.WriteFile(path, []byte(`{not valid json`), 0644); err != nil {
