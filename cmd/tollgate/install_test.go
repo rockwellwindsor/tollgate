@@ -18,6 +18,32 @@ func fakeShimSrcDir(t *testing.T) string {
 	return dir
 }
 
+func TestInstall_LeavesExistingConfigAlone(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("TOLLGATE_HOME", home)
+	srcDir := fakeShimSrcDir(t)
+
+	configPath := filepath.Join(home, "config.json")
+	existing := []byte(`{"default_action":"deny"}`)
+	if err := os.WriteFile(configPath, existing, 0644); err != nil {
+		t.Fatalf("WriteFile error = %v", err)
+	}
+
+	cmd := newInstallCmd()
+	cmd.SetOut(&bytes.Buffer{})
+	if err := install(cmd, srcDir); err != nil {
+		t.Fatalf("install error = %v", err)
+	}
+
+	got, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatalf("ReadFile error = %v", err)
+	}
+	if string(got) != string(existing) {
+		t.Errorf("config.json was modified: got %q, want %q", got, existing)
+	}
+}
+
 func TestInstall_WritesDefaultConfig(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("TOLLGATE_HOME", home)
