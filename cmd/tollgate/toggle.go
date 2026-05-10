@@ -28,7 +28,14 @@ func newResumeCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "resume",
 		Short: "Re-enable prompts for this shell session",
-		RunE:  func(cmd *cobra.Command, args []string) error { return nil },
+		RunE: func(cmd *cobra.Command, args []string) error {
+			mgr := state.NewManager(state.DefaultDir())
+			if err := mgr.ClearSessionPaused(os.Getpid()); err != nil {
+				return err
+			}
+			fmt.Fprintln(cmd.OutOrStdout(), "tollgate: session resumed")
+			return nil
+		},
 	}
 }
 

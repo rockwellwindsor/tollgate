@@ -65,6 +65,14 @@ func (m *Manager) IsSessionPaused(pid int) (bool, error) {
 	return m.sentinelExists(fmt.Sprintf("paused-%d", pid))
 }
 
+func (m *Manager) ClearSessionPaused(pid int) error {
+	err := os.Remove(filepath.Join(m.dir, fmt.Sprintf("paused-%d", pid)))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	return err
+}
+
 func (m *Manager) AllowForSession(pattern string, pid int) error {
 	return m.createSentinel(fmt.Sprintf("allowed-%d-%s", pid, pattern))
 }
