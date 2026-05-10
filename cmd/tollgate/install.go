@@ -33,8 +33,12 @@ func install(cmd *cobra.Command, srcDir string) error {
 		return err
 	}
 
-	for _, name := range []string{"shim-git", "shim-gh"} {
-		if err := copyExe(filepath.Join(srcDir, name), filepath.Join(binDir, name)); err != nil {
+	shims := map[string]string{
+		"shim-git": "git",
+		"shim-gh":  "gh",
+	}
+	for src, dst := range shims {
+		if err := copyExe(filepath.Join(srcDir, src), filepath.Join(binDir, dst)); err != nil {
 			return err
 		}
 	}

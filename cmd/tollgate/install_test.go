@@ -33,7 +33,7 @@ func TestInstall_Idempotent(t *testing.T) {
 		t.Fatalf("second install error = %v", err)
 	}
 
-	for _, name := range []string{"shim-git", "shim-gh"} {
+	for _, name := range []string{"git", "gh"} {
 		if _, err := os.Stat(filepath.Join(home, "bin", name)); os.IsNotExist(err) {
 			t.Errorf("%s missing after second install", name)
 		}
@@ -115,7 +115,7 @@ func TestInstall_WritesShimsWithExecuteBits(t *testing.T) {
 		t.Fatalf("install error = %v", err)
 	}
 
-	for _, name := range []string{"shim-git", "shim-gh"} {
+	for _, name := range []string{"git", "gh"} {
 		path := filepath.Join(home, "bin", name)
 		info, err := os.Stat(path)
 		if os.IsNotExist(err) {
