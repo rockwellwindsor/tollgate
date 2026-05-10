@@ -16,7 +16,7 @@ func newRootCmd() *cobra.Command {
 	}
 
 	root.AddCommand(
-		&cobra.Command{Use: "status", Short: "Show current state and active rules"},
+		newStatusCmd(),
 		&cobra.Command{Use: "pause", Short: "Disable prompts for this shell session"},
 		&cobra.Command{Use: "resume", Short: "Re-enable prompts for this shell session"},
 		&cobra.Command{Use: "on", Short: "Enable tollgate globally"},
