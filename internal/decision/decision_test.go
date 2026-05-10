@@ -39,6 +39,12 @@ func TestDecide(t *testing.T) {
 			env:   Env{},
 			want:  DenySilent,
 		},
+		{
+			name:  "match + TOLLGATE=off → AllowSilent (overrides everything)",
+			state: State{GlobalEnabled: true, DefaultAction: "deny", SessionDeny: true},
+			env:   Env{TollgateVar: "off"},
+			want:  AllowSilent,
+		},
 	}
 
 	for _, tt := range tests {

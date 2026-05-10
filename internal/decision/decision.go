@@ -22,6 +22,9 @@ type Env struct {
 }
 
 func Decide(match matcher.MatchResult, state State, env Env) Decision {
+	if env.TollgateVar == "off" {
+		return AllowSilent
+	}
 	if !state.GlobalEnabled {
 		return AllowSilent
 	}
