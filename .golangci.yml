@@ -1,0 +1,10 @@
+linters:
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - gofmt
+
+linters-settings:
+  errcheck:
+    check-test-funcs: false
