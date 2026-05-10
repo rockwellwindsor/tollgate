@@ -1,11 +1,15 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 
+	"github.com/rockwellwindsor/tollgate/internal/audit"
 	"github.com/rockwellwindsor/tollgate/internal/state"
 )
 
@@ -37,6 +41,13 @@ func runStatusCmd(cmd *cobra.Command, _ []string) error {
 	if paused {
 		fmt.Fprintln(cmd.OutOrStdout(), "session: paused")
 	}
+
+	logPath := filepath.Join(state.DefaultDir(), "audit.log")
+	entries, err := audit.Read(logPath)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	fmt.Fprintf(cmd.OutOrStdout(), "audit: %d entries\n", len(entries))
 
 	return nil
 }

@@ -3,9 +3,11 @@ package main
 import (
 	"bytes"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
+	"github.com/rockwellwindsor/tollgate/internal/audit"
 	"github.com/rockwellwindsor/tollgate/internal/state"
 )
 
@@ -18,6 +20,27 @@ func runStatus(t *testing.T, stateDir, auditPath string) string {
 	cmd.SetErr(buf)
 	_ = cmd.RunE(cmd, []string{})
 	return buf.String()
+}
+
+func TestStatus_AuditEntryCount(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("TOLLGATE_HOME", dir)
+
+	logPath := filepath.Join(dir, "audit.log")
+	entries := []audit.Entry{
+		{Binary: "git", Args: []string{"push"}, Pattern: "git-push", Decision: "allowed-once"},
+		{Binary: "gh", Args: []string{"pr", "create"}, Pattern: "gh-pr-create", Decision: "denied"},
+	}
+	for _, e := range entries {
+		if err := audit.Write(logPath, e); err != nil {
+			t.Fatalf("audit.Write() error = %v", err)
+		}
+	}
+
+	out := runStatus(t, dir, logPath)
+	if !strings.Contains(out, "2") {
+		t.Errorf("status output %q does not contain audit entry count", out)
+	}
 }
 
 func TestStatus_SessionPaused(t *testing.T) {
