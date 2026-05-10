@@ -25,6 +25,17 @@ func DefaultDir() string {
 	return filepath.Join(os.Getenv("HOME"), ".tollgate")
 }
 
+func (m *Manager) createSentinel(name string) error {
+	if err := os.MkdirAll(m.dir, 0755); err != nil {
+		return err
+	}
+	f, err := os.Create(filepath.Join(m.dir, name))
+	if err != nil {
+		return err
+	}
+	return f.Close()
+}
+
 func (m *Manager) IsGlobalOn() (bool, error) {
 	_, err := os.Stat(filepath.Join(m.dir, "disabled"))
 	if errors.Is(err, os.ErrNotExist) {
@@ -38,56 +49,27 @@ func (m *Manager) SetGlobalOn() error {
 }
 
 func (m *Manager) SetGlobalOff() error {
-	if err := os.MkdirAll(m.dir, 0755); err != nil {
-		return err
-	}
-	f, err := os.Create(filepath.Join(m.dir, "disabled"))
-	if err != nil {
-		return err
-	}
-	return f.Close()
-}
-
-func (m *Manager) sessionPausedPath(pid int) string {
-	return filepath.Join(m.dir, fmt.Sprintf("paused-%d", pid))
+	return m.createSentinel("disabled")
 }
 
 func (m *Manager) SetSessionPaused(pid int) error {
-	if err := os.MkdirAll(m.dir, 0755); err != nil {
-		return err
-	}
-	f, err := os.Create(m.sessionPausedPath(pid))
-	if err != nil {
-		return err
-	}
-	return f.Close()
+	return m.createSentinel(fmt.Sprintf("paused-%d", pid))
 }
 
 func (m *Manager) IsSessionPaused(pid int) (bool, error) {
-	_, err := os.Stat(m.sessionPausedPath(pid))
+	_, err := os.Stat(filepath.Join(m.dir, fmt.Sprintf("paused-%d", pid)))
 	if errors.Is(err, os.ErrNotExist) {
 		return false, nil
 	}
 	return err == nil, err
 }
 
-func (m *Manager) sessionAllowPath(pattern string, pid int) string {
-	return filepath.Join(m.dir, fmt.Sprintf("allowed-%d-%s", pid, pattern))
-}
-
 func (m *Manager) AllowForSession(pattern string, pid int) error {
-	if err := os.MkdirAll(m.dir, 0755); err != nil {
-		return err
-	}
-	f, err := os.Create(m.sessionAllowPath(pattern, pid))
-	if err != nil {
-		return err
-	}
-	return f.Close()
+	return m.createSentinel(fmt.Sprintf("allowed-%d-%s", pid, pattern))
 }
 
 func (m *Manager) IsAllowedForSession(pattern string, pid int) (bool, error) {
-	_, err := os.Stat(m.sessionAllowPath(pattern, pid))
+	_, err := os.Stat(filepath.Join(m.dir, fmt.Sprintf("allowed-%d-%s", pid, pattern)))
 	if errors.Is(err, os.ErrNotExist) {
 		return false, nil
 	}
