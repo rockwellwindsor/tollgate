@@ -2,6 +2,7 @@ package state
 
 import (
 	"os"
+	"os/exec"
 	"testing"
 )
 
@@ -14,6 +15,31 @@ func TestIsGlobalOn_DefaultTrue(t *testing.T) {
 	}
 	if !on {
 		t.Error("IsGlobalOn() = false, want true by default")
+	}
+}
+
+func TestPruneStaleSessions_RemovesDeadPID(t *testing.T) {
+	m := NewManager(t.TempDir())
+
+	cmd := exec.Command("true")
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("could not spawn process: %v", err)
+	}
+	deadPID := cmd.Process.Pid
+
+	if err := m.SetSessionPaused(deadPID); err != nil {
+		t.Fatalf("SetSessionPaused() error = %v", err)
+	}
+	if err := m.PruneStaleSessions(); err != nil {
+		t.Fatalf("PruneStaleSessions() error = %v", err)
+	}
+
+	paused, err := m.IsSessionPaused(deadPID)
+	if err != nil {
+		t.Fatalf("IsSessionPaused() error = %v", err)
+	}
+	if paused {
+		t.Errorf("IsSessionPaused(%d) = true after prune, want false", deadPID)
 	}
 }
 

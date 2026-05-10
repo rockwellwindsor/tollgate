@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
+	"syscall"
 )
 
 type Manager struct {
@@ -59,4 +62,36 @@ func (m *Manager) IsSessionPaused(pid int) (bool, error) {
 		return false, nil
 	}
 	return err == nil, err
+}
+
+func (m *Manager) PruneStaleSessions() error {
+	entries, err := os.ReadDir(m.dir)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	for _, e := range entries {
+		name := e.Name()
+		if !strings.HasPrefix(name, "paused-") {
+			continue
+		}
+		pid, err := strconv.Atoi(strings.TrimPrefix(name, "paused-"))
+		if err != nil {
+			continue
+		}
+		if !pidAlive(pid) {
+			os.Remove(filepath.Join(m.dir, name))
+		}
+	}
+	return nil
+}
+
+func pidAlive(pid int) bool {
+	p, err := os.FindProcess(pid)
+	if err != nil {
+		return false
+	}
+	return p.Signal(syscall.Signal(0)) == nil
 }
