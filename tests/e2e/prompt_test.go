@@ -141,7 +141,6 @@ func TestPrompt_NoDeniesAndExitsNonZero(t *testing.T) {
 
 func TestPrompt_YesInvokesFakeGit(t *testing.T) {
 	home := testkit.TempHome(t)
-	t.Setenv("TOLLGATE_HOME", home)
 
 	realDir := t.TempDir()
 	argsFile := filepath.Join(home, "git-args")
