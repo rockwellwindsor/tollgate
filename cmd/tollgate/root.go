@@ -21,7 +21,7 @@ func newRootCmd() *cobra.Command {
 		newResumeCmd(),
 		newOnCmd(),
 		newOffCmd(),
-		&cobra.Command{Use: "clear-logs", Short: "Delete the audit log"},
+		newClearLogsCmd(),
 		&cobra.Command{Use: "install", Short: "Write shim binaries and config"},
 		&cobra.Command{Use: "config", Short: "Show or edit configuration"},
 	)
