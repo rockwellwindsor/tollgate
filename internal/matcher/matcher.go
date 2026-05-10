@@ -19,23 +19,24 @@ func Match(binary string, args []string, patterns []Pattern) MatchResult {
 	}
 	subcommand := args[0]
 
-	// Check specific patterns (with AnyOfArgs) before general ones.
-	for _, specific := range []bool{true, false} {
-		for _, p := range patterns {
-			if p.Binary != binary || p.Subcommand != subcommand {
-				continue
-			}
-			if specific != (len(p.AnyOfArgs) > 0) {
-				continue
-			}
-			if len(p.AnyOfArgs) > 0 && !containsAny(args[1:], p.AnyOfArgs) {
-				continue
-			}
-			if !containsAll(args[1:], p.RequiredArgs) {
-				continue
-			}
-			return MatchResult{Matched: true, Pattern: p}
+	// Specific patterns (with AnyOfArgs) take precedence over general ones.
+	for _, p := range patterns {
+		if p.Binary != binary || p.Subcommand != subcommand || len(p.AnyOfArgs) == 0 {
+			continue
 		}
+		if !containsAny(args[1:], p.AnyOfArgs) || !containsAll(args[1:], p.RequiredArgs) {
+			continue
+		}
+		return MatchResult{Matched: true, Pattern: p}
+	}
+	for _, p := range patterns {
+		if p.Binary != binary || p.Subcommand != subcommand || len(p.AnyOfArgs) > 0 {
+			continue
+		}
+		if !containsAll(args[1:], p.RequiredArgs) {
+			continue
+		}
+		return MatchResult{Matched: true, Pattern: p}
 	}
 	return MatchResult{}
 }
