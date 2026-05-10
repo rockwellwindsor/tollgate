@@ -18,6 +18,18 @@ func TestLoad_MissingFile_ReturnsDefaults(t *testing.T) {
 	}
 }
 
+func TestLoad_MalformedJSON_ReturnsError(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.json")
+	if err := os.WriteFile(path, []byte(`{not valid json`), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil {
+		t.Fatal("Load() expected error for malformed JSON, got nil")
+	}
+}
+
 func TestLoad_ValidFile_ReturnsParsedValues(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.json")
 	if err := os.WriteFile(path, []byte(`{"default_action":"deny"}`), 0644); err != nil {
