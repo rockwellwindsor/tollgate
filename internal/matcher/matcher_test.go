@@ -56,6 +56,13 @@ func TestMatch(t *testing.T) {
 			wantMatched: true,
 			wantPattern: "git-push-force",
 		},
+		{
+			name:        "short flag -f matches git-push-force",
+			binary:      "git",
+			args:        []string{"push", "-f", "origin", "main"},
+			wantMatched: true,
+			wantPattern: "git-push-force",
+		},
 	}
 
 	for _, tt := range tests {
