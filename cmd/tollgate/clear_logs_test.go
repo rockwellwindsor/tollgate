@@ -20,6 +20,26 @@ func writeAuditLog(t *testing.T, dir string) string {
 	return logPath
 }
 
+func TestClearLogs_YesDeletesLog(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("TOLLGATE_HOME", dir)
+	logPath := writeAuditLog(t, dir)
+
+	cmd := newClearLogsCmd()
+	buf := &bytes.Buffer{}
+	cmd.SetOut(buf)
+	if err := cmd.ParseFlags([]string{"--yes"}); err != nil {
+		t.Fatalf("ParseFlags error = %v", err)
+	}
+	if err := cmd.RunE(cmd, []string{}); err != nil {
+		t.Fatalf("RunE error = %v", err)
+	}
+
+	if _, err := os.Stat(logPath); !os.IsNotExist(err) {
+		t.Error("expected audit.log to be deleted after --yes")
+	}
+}
+
 func TestClearLogs_DryRun(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("TOLLGATE_HOME", dir)

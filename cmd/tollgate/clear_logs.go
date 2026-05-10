@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/spf13/cobra"
@@ -23,11 +25,24 @@ func newClearLogsCmd() *cobra.Command {
 func runClearLogsCmd(cmd *cobra.Command, _ []string) error {
 	logPath := filepath.Join(state.DefaultDir(), "audit.log")
 	dryRun, _ := cmd.Flags().GetBool("dry-run")
+	yes, _ := cmd.Flags().GetBool("yes")
 
 	if dryRun {
 		fmt.Fprintf(cmd.OutOrStdout(), "would delete: %s\n", logPath)
 		return nil
 	}
 
+	if yes {
+		return deleteLog(logPath)
+	}
+
 	return nil
+}
+
+func deleteLog(path string) error {
+	err := os.Remove(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	return err
 }
