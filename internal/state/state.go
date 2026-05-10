@@ -69,6 +69,24 @@ func (m *Manager) AllowForSession(pattern string, pid int) error {
 	return m.createSentinel(fmt.Sprintf("allowed-%d-%s", pid, pattern))
 }
 
+func (m *Manager) AllowedPatterns(pid int) ([]string, error) {
+	prefix := fmt.Sprintf("allowed-%d-", pid)
+	entries, err := os.ReadDir(m.dir)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var patterns []string
+	for _, e := range entries {
+		if strings.HasPrefix(e.Name(), prefix) {
+			patterns = append(patterns, strings.TrimPrefix(e.Name(), prefix))
+		}
+	}
+	return patterns, nil
+}
+
 func (m *Manager) IsAllowedForSession(pattern string, pid int) (bool, error) {
 	return m.sentinelExists(fmt.Sprintf("allowed-%d-%s", pid, pattern))
 }

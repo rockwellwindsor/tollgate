@@ -22,6 +22,20 @@ func runStatus(t *testing.T, stateDir, auditPath string) string {
 	return buf.String()
 }
 
+func TestStatus_SessionAllowPatterns(t *testing.T) {
+	dir := t.TempDir()
+	mgr := state.NewManager(dir)
+	if err := mgr.AllowForSession("git-push", os.Getpid()); err != nil {
+		t.Fatalf("AllowForSession() error = %v", err)
+	}
+	t.Setenv("TOLLGATE_HOME", dir)
+
+	out := runStatus(t, dir, "")
+	if !strings.Contains(out, "git-push") {
+		t.Errorf("status output %q does not contain allowed pattern", out)
+	}
+}
+
 func TestStatus_AuditEntryCount(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("TOLLGATE_HOME", dir)

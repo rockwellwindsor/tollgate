@@ -42,6 +42,14 @@ func runStatusCmd(cmd *cobra.Command, _ []string) error {
 		fmt.Fprintln(cmd.OutOrStdout(), "session: paused")
 	}
 
+	patterns, err := mgr.AllowedPatterns(os.Getpid())
+	if err != nil {
+		return err
+	}
+	for _, p := range patterns {
+		fmt.Fprintf(cmd.OutOrStdout(), "session allow: %s\n", p)
+	}
+
 	logPath := filepath.Join(state.DefaultDir(), "audit.log")
 	entries, err := audit.Read(logPath)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
