@@ -1,6 +1,7 @@
 package state
 
 import (
+	"os"
 	"testing"
 )
 
@@ -13,6 +14,23 @@ func TestIsGlobalOn_DefaultTrue(t *testing.T) {
 	}
 	if !on {
 		t.Error("IsGlobalOn() = false, want true by default")
+	}
+}
+
+func TestSessionPaused_MarkedForPID(t *testing.T) {
+	m := NewManager(t.TempDir())
+	pid := os.Getpid()
+
+	if err := m.SetSessionPaused(pid); err != nil {
+		t.Fatalf("SetSessionPaused() error = %v", err)
+	}
+
+	paused, err := m.IsSessionPaused(pid)
+	if err != nil {
+		t.Fatalf("IsSessionPaused() error = %v", err)
+	}
+	if !paused {
+		t.Errorf("IsSessionPaused(%d) = false, want true", pid)
 	}
 }
 
