@@ -94,3 +94,32 @@ func TestExitCodePassthrough(t *testing.T) {
 		t.Errorf("exit code = %d, want 42", exitCode)
 	}
 }
+
+func TestStdioPassthrough(t *testing.T) {
+	realDir := t.TempDir()
+	script := "#!/bin/sh\necho \"stdout\"\necho \"stderr\" >&2\n"
+	if err := os.WriteFile(filepath.Join(realDir, "git"), []byte(script), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	shimDir := filepath.Dir(shimGitPath)
+	cmd := exec.Command(shimGitPath, "status")
+	cmd.Env = append(os.Environ(),
+		"PATH="+shimDir+string(os.PathListSeparator)+realDir,
+	)
+
+	var stdout, stderr strings.Builder
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("shim exited with error: %v", err)
+	}
+
+	if got := strings.TrimSpace(stdout.String()); got != "stdout" {
+		t.Errorf("stdout = %q, want %q", got, "stdout")
+	}
+	if got := strings.TrimSpace(stderr.String()); got != "stderr" {
+		t.Errorf("stderr = %q, want %q", got, "stderr")
+	}
+}
