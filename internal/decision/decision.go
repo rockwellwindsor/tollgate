@@ -25,5 +25,8 @@ func Decide(match matcher.MatchResult, state State, env Env) Decision {
 	if !state.GlobalEnabled {
 		return AllowSilent
 	}
+	if state.SessionAllow {
+		return AllowSilent
+	}
 	return Prompt
 }
