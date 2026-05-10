@@ -83,6 +83,36 @@ func TestPrompt_SessionAllowSkipsPrompt(t *testing.T) {
 	}
 }
 
+func TestPrompt_TollgateOffBypassesEverything(t *testing.T) {
+	home := testkit.TempHome(t)
+
+	realDir := t.TempDir()
+	argsFile := filepath.Join(home, "git-args")
+	testkit.FakeBinary(t, realDir, "git", `echo "$@" > `+argsFile)
+
+	shimDir := filepath.Dir(shimGitPath)
+	cmd := exec.Command(shimGitPath, "push", "origin", "main")
+	cmd.Env = append(os.Environ(),
+		"PATH="+shimDir+string(os.PathListSeparator)+realDir,
+		"HOME="+home,
+		"TOLLGATE_HOME="+home,
+		"TOLLGATE=off",
+	)
+	// no stdin — bypass must happen before any prompt attempt
+
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("shim exited with error: %v", err)
+	}
+
+	got, err := os.ReadFile(argsFile)
+	if err != nil {
+		t.Fatalf("fake git was never called — args file not found: %v", err)
+	}
+	if want := "push origin main"; strings.TrimSpace(string(got)) != want {
+		t.Errorf("fake git args = %q, want %q", strings.TrimSpace(string(got)), want)
+	}
+}
+
 func TestPrompt_NoDeniesAndExitsNonZero(t *testing.T) {
 	home := testkit.TempHome(t)
 
