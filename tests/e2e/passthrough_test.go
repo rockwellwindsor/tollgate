@@ -38,16 +38,10 @@ func buildShim(pkg string) (string, error) {
 
 func TestPassthrough(t *testing.T) {
 	home := testkit.TempHome(t)
-
 	realDir := t.TempDir()
 	argsFile := filepath.Join(home, "git-args")
-	fakeGit := testkit.FakeBinary(t, realDir, "git")
-	_ = fakeGit
 
-	script := "#!/bin/sh\necho \"$@\" > " + argsFile + "\n"
-	if err := os.WriteFile(filepath.Join(realDir, "git"), []byte(script), 0755); err != nil {
-		t.Fatal(err)
-	}
+	testkit.FakeBinary(t, realDir, "git", `echo "$@" > `+argsFile)
 
 	shimDir := filepath.Dir(shimGitPath)
 	cmd := exec.Command(shimGitPath, "push", "origin", "main")
@@ -73,10 +67,7 @@ func TestPassthrough(t *testing.T) {
 
 func TestExitCodePassthrough(t *testing.T) {
 	realDir := t.TempDir()
-	script := "#!/bin/sh\nexit 42\n"
-	if err := os.WriteFile(filepath.Join(realDir, "git"), []byte(script), 0755); err != nil {
-		t.Fatal(err)
-	}
+	testkit.FakeBinary(t, realDir, "git", "exit 42")
 
 	shimDir := filepath.Dir(shimGitPath)
 	cmd := exec.Command(shimGitPath, "push")
@@ -97,10 +88,7 @@ func TestExitCodePassthrough(t *testing.T) {
 
 func TestStdioPassthrough(t *testing.T) {
 	realDir := t.TempDir()
-	script := "#!/bin/sh\necho \"stdout\"\necho \"stderr\" >&2\n"
-	if err := os.WriteFile(filepath.Join(realDir, "git"), []byte(script), 0755); err != nil {
-		t.Fatal(err)
-	}
+	testkit.FakeBinary(t, realDir, "git", "echo \"stdout\"\necho \"stderr\" >&2")
 
 	shimDir := filepath.Dir(shimGitPath)
 	cmd := exec.Command(shimGitPath, "status")

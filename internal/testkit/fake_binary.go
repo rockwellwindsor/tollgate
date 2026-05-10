@@ -7,11 +7,13 @@ import (
 )
 
 // FakeBinary writes an executable shell script named `name` into `dir`.
+// body is the script content after the shebang line.
 // Returns the full path to the created file.
-func FakeBinary(t *testing.T, dir, name string) string {
+func FakeBinary(t *testing.T, dir, name, body string) string {
 	t.Helper()
 	path := filepath.Join(dir, name)
-	if err := os.WriteFile(path, []byte("#!/bin/sh\n"), 0755); err != nil {
+	script := "#!/bin/sh\n" + body + "\n"
+	if err := os.WriteFile(path, []byte(script), 0755); err != nil {
 		t.Fatal(err)
 	}
 	return path
