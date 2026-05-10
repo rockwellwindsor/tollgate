@@ -41,6 +41,21 @@ func TestLoad_MalformedJSON_ReturnsError(t *testing.T) {
 	}
 }
 
+func TestLoad_UnknownFields_NoError(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.json")
+	if err := os.WriteFile(path, []byte(`{"default_action":"allow","future_feature":true}`), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg, err := Load(path)
+	if err != nil {
+		t.Fatalf("Load() error = %v, want nil", err)
+	}
+	if cfg.DefaultAction != "allow" {
+		t.Errorf("DefaultAction = %q, want %q", cfg.DefaultAction, "allow")
+	}
+}
+
 func TestLoad_ValidFile_ReturnsParsedValues(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.json")
 	if err := os.WriteFile(path, []byte(`{"default_action":"deny"}`), 0644); err != nil {
