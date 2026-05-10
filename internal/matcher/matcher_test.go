@@ -49,6 +49,13 @@ func TestMatch(t *testing.T) {
 			args:        []string{"pr", "list"},
 			wantMatched: false,
 		},
+		{
+			name:        "args in different order still matched",
+			binary:      "git",
+			args:        []string{"push", "origin", "--force", "main"},
+			wantMatched: true,
+			wantPattern: "git-push-force",
+		},
 	}
 
 	for _, tt := range tests {
