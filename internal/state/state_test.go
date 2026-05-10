@@ -18,6 +18,23 @@ func TestIsGlobalOn_DefaultTrue(t *testing.T) {
 	}
 }
 
+func TestAllowForSession_SubsequentCallSees(t *testing.T) {
+	m := NewManager(t.TempDir())
+	pid := os.Getpid()
+
+	if err := m.AllowForSession("git-push", pid); err != nil {
+		t.Fatalf("AllowForSession() error = %v", err)
+	}
+
+	allowed, err := m.IsAllowedForSession("git-push", pid)
+	if err != nil {
+		t.Fatalf("IsAllowedForSession() error = %v", err)
+	}
+	if !allowed {
+		t.Errorf("IsAllowedForSession(%q, %d) = false, want true", "git-push", pid)
+	}
+}
+
 func TestPruneStaleSessions_RemovesDeadPID(t *testing.T) {
 	m := NewManager(t.TempDir())
 

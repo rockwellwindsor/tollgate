@@ -64,6 +64,29 @@ func (m *Manager) IsSessionPaused(pid int) (bool, error) {
 	return err == nil, err
 }
 
+func (m *Manager) sessionAllowPath(pattern string, pid int) string {
+	return filepath.Join(m.dir, fmt.Sprintf("allowed-%d-%s", pid, pattern))
+}
+
+func (m *Manager) AllowForSession(pattern string, pid int) error {
+	if err := os.MkdirAll(m.dir, 0755); err != nil {
+		return err
+	}
+	f, err := os.Create(m.sessionAllowPath(pattern, pid))
+	if err != nil {
+		return err
+	}
+	return f.Close()
+}
+
+func (m *Manager) IsAllowedForSession(pattern string, pid int) (bool, error) {
+	_, err := os.Stat(m.sessionAllowPath(pattern, pid))
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+	return err == nil, err
+}
+
 func (m *Manager) PruneStaleSessions() error {
 	entries, err := os.ReadDir(m.dir)
 	if errors.Is(err, os.ErrNotExist) {
