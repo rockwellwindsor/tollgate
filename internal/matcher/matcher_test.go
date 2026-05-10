@@ -6,6 +6,7 @@ var defaultPatterns = []Pattern{
 	{Name: "git-push", Binary: "git", Subcommand: "push"},
 	{Name: "git-push-force", Binary: "git", Subcommand: "push", AnyOfArgs: []string{"--force", "-f"}},
 	{Name: "gh-pr-create", Binary: "gh", Subcommand: "pr", RequiredArgs: []string{"create"}},
+	{Name: "gh-pr-merge", Binary: "gh", Subcommand: "pr", RequiredArgs: []string{"merge"}},
 }
 
 func TestMatch(t *testing.T) {
@@ -55,6 +56,13 @@ func TestMatch(t *testing.T) {
 			args:        []string{"push", "origin", "--force", "main"},
 			wantMatched: true,
 			wantPattern: "git-push-force",
+		},
+		{
+			name:        "gh pr merge matched",
+			binary:      "gh",
+			args:        []string{"pr", "merge", "42"},
+			wantMatched: true,
+			wantPattern: "gh-pr-merge",
 		},
 		{
 			name:        "short flag -f matches git-push-force",
