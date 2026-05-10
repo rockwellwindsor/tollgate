@@ -45,6 +45,27 @@ Unwatched invocations (`git status`, `gh pr list`, etc.) pass through with negli
 
 ---
 
+## When it works (and when it doesn't)
+
+The shim approach relies on `$PATH` inheritance. When any process runs `git` or `gh`, the OS searches `$PATH` in order and runs the first match. The shim wins by being first.
+
+Interception depends on two things being true at the same time:
+
+1. `~/.tollgate/bin` is in `$PATH`
+2. The process running the command inherited that `$PATH`
+
+**The common case that works:** You open a terminal, your shell sources `.zshrc`, and you launch Claude Code from that terminal. Every bash command Claude runs inherits that `$PATH`. Subagents, background tasks, parallel tool calls: all protected, because they are all subprocesses of the same Claude Code instance.
+
+**What won't be protected by default:**
+
+- A Claude Code session that was open *before* you ran `tollgate install` and updated `.zshrc`. That session inherited the old `$PATH`. Open a new terminal to pick it up.
+- Cron jobs, launchd services, and CI runners. These typically don't source `.zshrc` and start with a minimal environment. They need explicit `PATH` setup in their own config.
+- Any process that calls `git` or `gh` using a full absolute path (e.g. `/opt/homebrew/bin/git`) instead of relying on `$PATH` lookup.
+
+**Quick check:** Run `which git` after install. If it returns `~/.tollgate/bin/git`, the current session is protected. If it returns anything else, run `source ~/.zshrc` or open a new terminal.
+
+---
+
 ## Install
 
 ### From source
