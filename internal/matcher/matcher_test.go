@@ -43,6 +43,12 @@ func TestMatch(t *testing.T) {
 			wantMatched: true,
 			wantPattern: "gh-pr-create",
 		},
+		{
+			name:        "gh pr list not matched",
+			binary:      "gh",
+			args:        []string{"pr", "list"},
+			wantMatched: false,
+		},
 	}
 
 	for _, tt := range tests {
