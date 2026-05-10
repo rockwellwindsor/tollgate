@@ -48,6 +48,7 @@ func TestPassthrough(t *testing.T) {
 	cmd.Env = append(os.Environ(),
 		"PATH="+shimDir+string(os.PathListSeparator)+realDir,
 		"HOME="+home,
+		"TOLLGATE=off",
 	)
 
 	if err := cmd.Run(); err != nil {
@@ -73,6 +74,7 @@ func TestExitCodePassthrough(t *testing.T) {
 	cmd := exec.Command(shimGitPath, "push")
 	cmd.Env = append(os.Environ(),
 		"PATH="+shimDir+string(os.PathListSeparator)+realDir,
+		"TOLLGATE=off",
 	)
 
 	err := cmd.Run()
