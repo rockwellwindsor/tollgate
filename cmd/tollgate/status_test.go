@@ -19,6 +19,20 @@ func runStatus(t *testing.T, stateDir, auditPath string) string {
 	return buf.String()
 }
 
+func TestStatus_GlobalDisabled(t *testing.T) {
+	dir := t.TempDir()
+	mgr := state.NewManager(dir)
+	if err := mgr.SetGlobalOff(); err != nil {
+		t.Fatalf("SetGlobalOff() error = %v", err)
+	}
+	t.Setenv("TOLLGATE_HOME", dir)
+
+	out := runStatus(t, dir, "")
+	if !strings.Contains(out, "DISABLED") {
+		t.Errorf("status output %q does not contain DISABLED", out)
+	}
+}
+
 func TestStatus_GlobalEnabled(t *testing.T) {
 	dir := t.TempDir()
 	_ = state.NewManager(dir) // no SetGlobalOff — defaults to on
