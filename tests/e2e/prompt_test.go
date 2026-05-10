@@ -10,6 +10,32 @@ import (
 	"github.com/rockwellwindsor/tollgate/internal/testkit"
 )
 
+func TestPrompt_NoDeniesAndExitsNonZero(t *testing.T) {
+	home := testkit.TempHome(t)
+
+	realDir := t.TempDir()
+	argsFile := filepath.Join(home, "git-args")
+	testkit.FakeBinary(t, realDir, "git", `echo "$@" > `+argsFile)
+
+	shimDir := filepath.Dir(shimGitPath)
+	cmd := exec.Command(shimGitPath, "push", "origin", "main")
+	cmd.Env = append(os.Environ(),
+		"PATH="+shimDir+string(os.PathListSeparator)+realDir,
+		"HOME="+home,
+		"TOLLGATE_HOME="+home,
+	)
+	cmd.Stdin = strings.NewReader("n")
+
+	err := cmd.Run()
+	if err == nil {
+		t.Fatal("shim exited zero after 'n', want non-zero")
+	}
+
+	if _, statErr := os.Stat(argsFile); statErr == nil {
+		t.Error("fake git was called after 'n', want no invocation")
+	}
+}
+
 func TestPrompt_YesInvokesFakeGit(t *testing.T) {
 	home := testkit.TempHome(t)
 	t.Setenv("TOLLGATE_HOME", home)
