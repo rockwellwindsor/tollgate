@@ -51,6 +51,12 @@ func TestDecide(t *testing.T) {
 			env:   Env{},
 			want:  DenySilent,
 		},
+		{
+			name:  "match + default_action allow + no override → AllowSilent",
+			state: State{GlobalEnabled: true, DefaultAction: "allow"},
+			env:   Env{},
+			want:  AllowSilent,
+		},
 	}
 
 	for _, tt := range tests {

@@ -37,5 +37,8 @@ func Decide(match matcher.MatchResult, state State, env Env) Decision {
 	if state.DefaultAction == "deny" {
 		return DenySilent
 	}
+	if state.DefaultAction == "allow" {
+		return AllowSilent
+	}
 	return Prompt
 }
