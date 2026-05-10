@@ -18,6 +18,30 @@ func fakeShimSrcDir(t *testing.T) string {
 	return dir
 }
 
+func TestInstall_WritesShimsWithExecuteBits(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("TOLLGATE_HOME", home)
+	srcDir := fakeShimSrcDir(t)
+
+	cmd := newInstallCmd()
+	cmd.SetOut(&bytes.Buffer{})
+	if err := install(cmd, srcDir); err != nil {
+		t.Fatalf("install error = %v", err)
+	}
+
+	for _, name := range []string{"shim-git", "shim-gh"} {
+		path := filepath.Join(home, "bin", name)
+		info, err := os.Stat(path)
+		if os.IsNotExist(err) {
+			t.Errorf("expected %s to exist", path)
+			continue
+		}
+		if info.Mode()&0111 == 0 {
+			t.Errorf("%s is not executable (mode %o)", name, info.Mode())
+		}
+	}
+}
+
 func TestInstall_CreatesBinDir(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("TOLLGATE_HOME", home)
