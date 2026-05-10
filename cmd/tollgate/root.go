@@ -17,10 +17,10 @@ func newRootCmd() *cobra.Command {
 
 	root.AddCommand(
 		newStatusCmd(),
-		&cobra.Command{Use: "pause", Short: "Disable prompts for this shell session"},
-		&cobra.Command{Use: "resume", Short: "Re-enable prompts for this shell session"},
-		&cobra.Command{Use: "on", Short: "Enable tollgate globally"},
-		&cobra.Command{Use: "off", Short: "Disable tollgate globally"},
+		newPauseCmd(),
+		newResumeCmd(),
+		newOnCmd(),
+		newOffCmd(),
 		&cobra.Command{Use: "clear-logs", Short: "Delete the audit log"},
 		&cobra.Command{Use: "install", Short: "Write shim binaries and config"},
 		&cobra.Command{Use: "config", Short: "Show or edit configuration"},
