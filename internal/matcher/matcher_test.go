@@ -1,16 +1,11 @@
-package matcher
+package matcher_test
 
-import "testing"
+import (
+	"testing"
 
-var defaultPatterns = []Pattern{
-	{Name: "git-push", Binary: "git", Subcommand: "push"},
-	{Name: "git-push-force", Binary: "git", Subcommand: "push", AnyOfArgs: []string{"--force", "-f"}},
-	{Name: "gh-pr-create", Binary: "gh", Subcommand: "pr", RequiredArgs: []string{"create"}},
-	{Name: "gh-pr-merge", Binary: "gh", Subcommand: "pr", RequiredArgs: []string{"merge"}},
-	{Name: "gh-repo-create", Binary: "gh", Subcommand: "repo", RequiredArgs: []string{"create"}},
-	{Name: "gh-repo-delete", Binary: "gh", Subcommand: "repo", RequiredArgs: []string{"delete"}},
-	{Name: "gh-release-create", Binary: "gh", Subcommand: "release", RequiredArgs: []string{"create"}},
-}
+	"github.com/rockwellwindsor/tollgate/internal/matcher"
+	"github.com/rockwellwindsor/tollgate/internal/patterns"
+)
 
 func TestMatch(t *testing.T) {
 	tests := []struct {
@@ -99,7 +94,7 @@ func TestMatch(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := Match(tt.binary, tt.args, defaultPatterns)
+			got := matcher.Match(tt.binary, tt.args, patterns.Defaults)
 			if got.Matched != tt.wantMatched {
 				t.Errorf("Matched = %v, want %v", got.Matched, tt.wantMatched)
 			}
