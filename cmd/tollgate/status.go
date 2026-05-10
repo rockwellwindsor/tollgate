@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -27,6 +28,14 @@ func runStatusCmd(cmd *cobra.Command, _ []string) error {
 		fmt.Fprintln(cmd.OutOrStdout(), "tollgate: ENABLED")
 	} else {
 		fmt.Fprintln(cmd.OutOrStdout(), "tollgate: DISABLED")
+	}
+
+	paused, err := mgr.IsSessionPaused(os.Getpid())
+	if err != nil {
+		return err
+	}
+	if paused {
+		fmt.Fprintln(cmd.OutOrStdout(), "session: paused")
 	}
 
 	return nil
