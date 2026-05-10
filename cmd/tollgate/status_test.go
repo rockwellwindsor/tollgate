@@ -11,10 +11,9 @@ import (
 	"github.com/rockwellwindsor/tollgate/internal/state"
 )
 
-func runStatus(t *testing.T, stateDir, auditPath string) string {
+func runStatus(t *testing.T) string {
 	t.Helper()
 	cmd := newStatusCmd()
-	cmd.SetArgs([]string{})
 	buf := &bytes.Buffer{}
 	cmd.SetOut(buf)
 	cmd.SetErr(buf)
@@ -30,7 +29,7 @@ func TestStatus_SessionAllowPatterns(t *testing.T) {
 	}
 	t.Setenv("TOLLGATE_HOME", dir)
 
-	out := runStatus(t, dir, "")
+	out := runStatus(t)
 	if !strings.Contains(out, "git-push") {
 		t.Errorf("status output %q does not contain allowed pattern", out)
 	}
@@ -51,7 +50,7 @@ func TestStatus_AuditEntryCount(t *testing.T) {
 		}
 	}
 
-	out := runStatus(t, dir, logPath)
+	out := runStatus(t)
 	if !strings.Contains(out, "2") {
 		t.Errorf("status output %q does not contain audit entry count", out)
 	}
@@ -65,7 +64,7 @@ func TestStatus_SessionPaused(t *testing.T) {
 	}
 	t.Setenv("TOLLGATE_HOME", dir)
 
-	out := runStatus(t, dir, "")
+	out := runStatus(t)
 	if !strings.Contains(out, "paused") {
 		t.Errorf("status output %q does not contain paused", out)
 	}
@@ -79,7 +78,7 @@ func TestStatus_GlobalDisabled(t *testing.T) {
 	}
 	t.Setenv("TOLLGATE_HOME", dir)
 
-	out := runStatus(t, dir, "")
+	out := runStatus(t)
 	if !strings.Contains(out, "DISABLED") {
 		t.Errorf("status output %q does not contain DISABLED", out)
 	}
@@ -90,7 +89,7 @@ func TestStatus_GlobalEnabled(t *testing.T) {
 	_ = state.NewManager(dir) // no SetGlobalOff — defaults to on
 	t.Setenv("TOLLGATE_HOME", dir)
 
-	out := runStatus(t, dir, "")
+	out := runStatus(t)
 	if !strings.Contains(out, "ENABLED") {
 		t.Errorf("status output %q does not contain ENABLED", out)
 	}
