@@ -3,6 +3,7 @@ package audit
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -73,5 +74,42 @@ func TestWrite_CreatesDirectoryIfMissing(t *testing.T) {
 
 	if _, err := os.Stat(path); err != nil {
 		t.Errorf("log file not created: %v", err)
+	}
+}
+
+func TestWrite_ConcurrentWritesProduceValidLines(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "audit.log")
+
+	const n = 20
+	errc := make(chan error, n)
+	for i := range n {
+		go func(i int) {
+			errc <- Write(path, Entry{Binary: "git", Args: []string{"push"}, Pattern: "git-push", Decision: fmt.Sprintf("decision-%d", i)})
+		}(i)
+	}
+	for range n {
+		if err := <-errc; err != nil {
+			t.Errorf("Write() error = %v", err)
+		}
+	}
+
+	f, err := os.Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	lineCount := 0
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := scanner.Bytes()
+		if !json.Valid(line) {
+			t.Errorf("line %d is not valid JSON: %s", lineCount+1, line)
+		}
+		lineCount++
+	}
+	if lineCount != n {
+		t.Errorf("got %d lines, want %d", lineCount, n)
 	}
 }
