@@ -70,3 +70,27 @@ func TestPassthrough(t *testing.T) {
 		t.Errorf("fake git called with %q, want %q", gotStr, want)
 	}
 }
+
+func TestExitCodePassthrough(t *testing.T) {
+	realDir := t.TempDir()
+	script := "#!/bin/sh\nexit 42\n"
+	if err := os.WriteFile(filepath.Join(realDir, "git"), []byte(script), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	shimDir := filepath.Dir(shimGitPath)
+	cmd := exec.Command(shimGitPath, "push")
+	cmd.Env = append(os.Environ(),
+		"PATH="+shimDir+string(os.PathListSeparator)+realDir,
+	)
+
+	err := cmd.Run()
+	exitCode := 0
+	if exitErr, ok := err.(*exec.ExitError); ok {
+		exitCode = exitErr.ExitCode()
+	}
+
+	if exitCode != 42 {
+		t.Errorf("exit code = %d, want 42", exitCode)
+	}
+}
