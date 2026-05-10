@@ -19,6 +19,27 @@ func fakeShimSrcDir(t *testing.T) string {
 	return dir
 }
 
+func TestInstall_Idempotent(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("TOLLGATE_HOME", home)
+	srcDir := fakeShimSrcDir(t)
+
+	cmd := newInstallCmd()
+	cmd.SetOut(&bytes.Buffer{})
+	if err := install(cmd, srcDir); err != nil {
+		t.Fatalf("first install error = %v", err)
+	}
+	if err := install(cmd, srcDir); err != nil {
+		t.Fatalf("second install error = %v", err)
+	}
+
+	for _, name := range []string{"shim-git", "shim-gh"} {
+		if _, err := os.Stat(filepath.Join(home, "bin", name)); os.IsNotExist(err) {
+			t.Errorf("%s missing after second install", name)
+		}
+	}
+}
+
 func TestInstall_PrintsPathInstructions(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("TOLLGATE_HOME", home)
