@@ -121,7 +121,7 @@ func (m *Manager) PruneStaleSessions() error {
 			continue
 		}
 		if !pidAlive(pid) {
-			os.Remove(filepath.Join(m.dir, name))
+			_ = os.Remove(filepath.Join(m.dir, name))
 		}
 	}
 	return nil
