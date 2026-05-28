@@ -86,6 +86,14 @@ func TestSessionPaused_MarkedForPID(t *testing.T) {
 	}
 }
 
+func TestSetGlobalOn_WhenAlreadyOn_IsNoOp(t *testing.T) {
+	m := NewManager(t.TempDir())
+	// fresh dir: no disabled marker, so already on
+	if err := m.SetGlobalOn(); err != nil {
+		t.Fatalf("SetGlobalOn() on already-on state: error = %v", err)
+	}
+}
+
 func TestSetGlobalOff_IsGlobalOnReturnsFalse(t *testing.T) {
 	m := NewManager(t.TempDir())
 

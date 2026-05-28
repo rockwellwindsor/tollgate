@@ -50,7 +50,11 @@ func (m *Manager) IsGlobalOn() (bool, error) {
 }
 
 func (m *Manager) SetGlobalOn() error {
-	return os.Remove(filepath.Join(m.dir, "disabled"))
+	err := os.Remove(filepath.Join(m.dir, "disabled"))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	return err
 }
 
 func (m *Manager) SetGlobalOff() error {

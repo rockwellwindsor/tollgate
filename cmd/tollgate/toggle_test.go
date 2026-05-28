@@ -29,6 +29,16 @@ func TestOn_SetsGlobalOn(t *testing.T) {
 	}
 }
 
+func TestOn_WhenAlreadyOn_IsNoOp(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("TOLLGATE_HOME", dir)
+	// no prior SetGlobalOff — default state is on
+	cmd := newOnCmd()
+	if err := cmd.RunE(cmd, []string{}); err != nil {
+		t.Fatalf("tollgate on (already on): error = %v", err)
+	}
+}
+
 func TestOff_SetsGlobalOff(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("TOLLGATE_HOME", dir)
