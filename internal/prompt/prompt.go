@@ -21,7 +21,7 @@ const (
 var dialogFn = osascriptDialog
 
 func Ask(w io.Writer, r io.Reader, binary string, args []string) (Response, error) {
-	fmt.Fprintf(w, "tollgate: allow %s %v? [y/n/a] ", binary, args)
+	_, _ = fmt.Fprintf(w, "tollgate: allow %s %v? [y/n/a] ", binary, args)
 	buf := make([]byte, 1)
 	_, err := r.Read(buf)
 	if errors.Is(err, io.EOF) {
