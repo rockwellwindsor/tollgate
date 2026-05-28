@@ -20,13 +20,13 @@ func newPauseCmd() *cobra.Command {
 				return err
 			}
 			if paused {
-				fmt.Fprintln(cmd.OutOrStdout(), "tollgate: already paused")
+				_, _ = fmt.Fprintln(cmd.OutOrStdout(), "tollgate: already paused")
 				return nil
 			}
 			if err := mgr.SetSessionPaused(os.Getpid()); err != nil {
 				return err
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), "tollgate: session paused")
+			_, _ = fmt.Fprintln(cmd.OutOrStdout(), "tollgate: session paused")
 			return nil
 		},
 	}
@@ -43,13 +43,13 @@ func newResumeCmd() *cobra.Command {
 				return err
 			}
 			if !paused {
-				fmt.Fprintln(cmd.OutOrStdout(), "tollgate: not paused")
+				_, _ = fmt.Fprintln(cmd.OutOrStdout(), "tollgate: not paused")
 				return nil
 			}
 			if err := mgr.ClearSessionPaused(os.Getpid()); err != nil {
 				return err
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), "tollgate: session resumed")
+			_, _ = fmt.Fprintln(cmd.OutOrStdout(), "tollgate: session resumed")
 			return nil
 		},
 	}
@@ -66,13 +66,13 @@ func newOnCmd() *cobra.Command {
 				return err
 			}
 			if on {
-				fmt.Fprintln(cmd.OutOrStdout(), "tollgate: already enabled")
+				_, _ = fmt.Fprintln(cmd.OutOrStdout(), "tollgate: already enabled")
 				return nil
 			}
 			if err := mgr.SetGlobalOn(); err != nil {
 				return err
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), "tollgate: enabled")
+			_, _ = fmt.Fprintln(cmd.OutOrStdout(), "tollgate: enabled")
 			return nil
 		},
 	}
@@ -89,13 +89,13 @@ func newOffCmd() *cobra.Command {
 				return err
 			}
 			if !on {
-				fmt.Fprintln(cmd.OutOrStdout(), "tollgate: already disabled")
+				_, _ = fmt.Fprintln(cmd.OutOrStdout(), "tollgate: already disabled")
 				return nil
 			}
 			if err := mgr.SetGlobalOff(); err != nil {
 				return err
 			}
-			fmt.Fprintln(cmd.OutOrStdout(), "tollgate: disabled")
+			_, _ = fmt.Fprintln(cmd.OutOrStdout(), "tollgate: disabled")
 			return nil
 		},
 	}
