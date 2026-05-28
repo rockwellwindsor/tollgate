@@ -46,7 +46,7 @@ func TestWrite_ValidJSONLinesPerEntry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	lineCount := 0
 	scanner := bufio.NewScanner(f)
@@ -118,8 +118,8 @@ func TestRead_SkipsCorruptedLines(t *testing.T) {
 	if err != nil {
 		t.Fatalf("open for append: %v", err)
 	}
-	fmt.Fprintln(f, "not valid json")
-	f.Close()
+	_, _ = fmt.Fprintln(f, "not valid json")
+	_ = f.Close()
 	if err := Write(path, good); err != nil {
 		t.Fatalf("Write() error = %v", err)
 	}
@@ -154,7 +154,7 @@ func TestWrite_ConcurrentWritesProduceValidLines(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	lineCount := 0
 	scanner := bufio.NewScanner(f)
