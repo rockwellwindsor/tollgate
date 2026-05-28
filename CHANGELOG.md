@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.1] - 2026-05-27
+
+### Fixed
+
+- `tollgate on` no longer errors when tollgate is already enabled
+- `tollgate install` now copies the `tollgate` management binary into
+  `~/.tollgate/bin/` alongside the shims
+- `audit.Read` skips malformed JSONL lines instead of making the entire
+  log unreadable
+
+### Changed
+
+- `on`, `off`, `pause`, `resume` print a clear message when the desired
+  state is already set, rather than silently succeeding
+
 ## [0.1.0] - 2026-05-10
 
 Initial release.

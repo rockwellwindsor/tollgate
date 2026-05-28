@@ -12,7 +12,7 @@ func newRootCmd() *cobra.Command {
 		Use:     "tollgate",
 		Short:   "A checkpoint for sensitive operations",
 		Long:    rootLong,
-		Version: "0.1.0",
+		Version: "0.1.1",
 	}
 
 	root.AddCommand(

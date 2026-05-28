@@ -15,7 +15,7 @@ func TestVersionFlag(t *testing.T) {
 	_ = cmd.Execute()
 
 	got := buf.String()
-	if !strings.Contains(got, "0.1.0") {
+	if !strings.Contains(got, "tollgate version") {
 		t.Errorf("--version output %q does not contain version string", got)
 	}
 }
