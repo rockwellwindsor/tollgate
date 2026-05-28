@@ -11,12 +11,29 @@ import (
 func fakeShimSrcDir(t *testing.T) string {
 	t.Helper()
 	dir := t.TempDir()
-	for _, name := range []string{"shim-git", "shim-gh"} {
+	for _, name := range []string{"shim-git", "shim-gh", "tollgate"} {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte("#!/bin/sh\n"), 0755); err != nil {
 			t.Fatalf("WriteFile %s error = %v", name, err)
 		}
 	}
 	return dir
+}
+
+func TestInstall_WritesTollgateBinary(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("TOLLGATE_HOME", home)
+	srcDir := fakeShimSrcDir(t)
+
+	cmd := newInstallCmd()
+	cmd.SetOut(&bytes.Buffer{})
+	if err := install(cmd, srcDir); err != nil {
+		t.Fatalf("install() error = %v", err)
+	}
+
+	want := filepath.Join(home, "bin", "tollgate")
+	if _, err := os.Stat(want); err != nil {
+		t.Errorf("tollgate binary not found in bin dir: %v", err)
+	}
 }
 
 func TestInstall_Idempotent(t *testing.T) {

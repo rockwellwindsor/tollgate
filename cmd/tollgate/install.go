@@ -43,6 +43,10 @@ func install(cmd *cobra.Command, srcDir string) error {
 		}
 	}
 
+	if err := copyExe(filepath.Join(srcDir, "tollgate"), filepath.Join(binDir, "tollgate")); err != nil {
+		return err
+	}
+
 	configPath := filepath.Join(home, "config.json")
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
 		if err := os.WriteFile(configPath, []byte("{}\n"), 0644); err != nil {
