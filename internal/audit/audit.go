@@ -22,14 +22,16 @@ func Write(path string, entry Entry) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-
 	line, err := json.Marshal(entry)
 	if err != nil {
+		_ = f.Close()
 		return err
 	}
-	_, err = f.Write(append(line, '\n'))
-	return err
+	if _, err = f.Write(append(line, '\n')); err != nil {
+		_ = f.Close()
+		return err
+	}
+	return f.Close()
 }
 
 func Read(path string) ([]Entry, error) {
@@ -37,7 +39,7 @@ func Read(path string) ([]Entry, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	var entries []Entry
 	scanner := bufio.NewScanner(f)
