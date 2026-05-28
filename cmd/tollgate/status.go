@@ -56,7 +56,7 @@ func runStatusCmd(cmd *cobra.Command, _ []string) error {
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
-	fmt.Fprintf(cmd.OutOrStdout(), "audit: %d entries\n", len(entries))
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "audit: %d entries\n", len(entries))
 
 	return nil
 }
