@@ -15,6 +15,14 @@ func newPauseCmd() *cobra.Command {
 		Short: "Disable prompts for this shell session",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			mgr := state.NewManager(state.DefaultDir())
+			paused, err := mgr.IsSessionPaused(os.Getpid())
+			if err != nil {
+				return err
+			}
+			if paused {
+				fmt.Fprintln(cmd.OutOrStdout(), "tollgate: already paused")
+				return nil
+			}
 			if err := mgr.SetSessionPaused(os.Getpid()); err != nil {
 				return err
 			}
@@ -30,6 +38,14 @@ func newResumeCmd() *cobra.Command {
 		Short: "Re-enable prompts for this shell session",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			mgr := state.NewManager(state.DefaultDir())
+			paused, err := mgr.IsSessionPaused(os.Getpid())
+			if err != nil {
+				return err
+			}
+			if !paused {
+				fmt.Fprintln(cmd.OutOrStdout(), "tollgate: not paused")
+				return nil
+			}
 			if err := mgr.ClearSessionPaused(os.Getpid()); err != nil {
 				return err
 			}
@@ -45,6 +61,14 @@ func newOnCmd() *cobra.Command {
 		Short: "Enable tollgate globally",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			mgr := state.NewManager(state.DefaultDir())
+			on, err := mgr.IsGlobalOn()
+			if err != nil {
+				return err
+			}
+			if on {
+				fmt.Fprintln(cmd.OutOrStdout(), "tollgate: already enabled")
+				return nil
+			}
 			if err := mgr.SetGlobalOn(); err != nil {
 				return err
 			}
@@ -60,6 +84,14 @@ func newOffCmd() *cobra.Command {
 		Short: "Disable tollgate globally",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			mgr := state.NewManager(state.DefaultDir())
+			on, err := mgr.IsGlobalOn()
+			if err != nil {
+				return err
+			}
+			if !on {
+				fmt.Fprintln(cmd.OutOrStdout(), "tollgate: already disabled")
+				return nil
+			}
 			if err := mgr.SetGlobalOff(); err != nil {
 				return err
 			}

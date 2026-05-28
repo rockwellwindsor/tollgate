@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/rockwellwindsor/tollgate/internal/state"
@@ -29,13 +31,71 @@ func TestOn_SetsGlobalOn(t *testing.T) {
 	}
 }
 
-func TestOn_WhenAlreadyOn_IsNoOp(t *testing.T) {
+func TestOn_WhenAlreadyOn_PrintsAlreadyEnabled(t *testing.T) {
 	dir := t.TempDir()
 	t.Setenv("TOLLGATE_HOME", dir)
-	// no prior SetGlobalOff — default state is on
+
 	cmd := newOnCmd()
+	buf := &bytes.Buffer{}
+	cmd.SetOut(buf)
 	if err := cmd.RunE(cmd, []string{}); err != nil {
 		t.Fatalf("tollgate on (already on): error = %v", err)
+	}
+	if !strings.Contains(buf.String(), "already enabled") {
+		t.Errorf("got %q, want output containing \"already enabled\"", buf.String())
+	}
+}
+
+func TestOff_WhenAlreadyOff_PrintsAlreadyDisabled(t *testing.T) {
+	dir := t.TempDir()
+	mgr := state.NewManager(dir)
+	if err := mgr.SetGlobalOff(); err != nil {
+		t.Fatalf("SetGlobalOff error = %v", err)
+	}
+	t.Setenv("TOLLGATE_HOME", dir)
+
+	cmd := newOffCmd()
+	buf := &bytes.Buffer{}
+	cmd.SetOut(buf)
+	if err := cmd.RunE(cmd, []string{}); err != nil {
+		t.Fatalf("tollgate off (already off): error = %v", err)
+	}
+	if !strings.Contains(buf.String(), "already disabled") {
+		t.Errorf("got %q, want output containing \"already disabled\"", buf.String())
+	}
+}
+
+func TestPause_WhenAlreadyPaused_PrintsAlreadyPaused(t *testing.T) {
+	dir := t.TempDir()
+	mgr := state.NewManager(dir)
+	if err := mgr.SetSessionPaused(os.Getpid()); err != nil {
+		t.Fatalf("SetSessionPaused error = %v", err)
+	}
+	t.Setenv("TOLLGATE_HOME", dir)
+
+	cmd := newPauseCmd()
+	buf := &bytes.Buffer{}
+	cmd.SetOut(buf)
+	if err := cmd.RunE(cmd, []string{}); err != nil {
+		t.Fatalf("tollgate pause (already paused): error = %v", err)
+	}
+	if !strings.Contains(buf.String(), "already paused") {
+		t.Errorf("got %q, want output containing \"already paused\"", buf.String())
+	}
+}
+
+func TestResume_WhenNotPaused_PrintsNotPaused(t *testing.T) {
+	dir := t.TempDir()
+	t.Setenv("TOLLGATE_HOME", dir)
+
+	cmd := newResumeCmd()
+	buf := &bytes.Buffer{}
+	cmd.SetOut(buf)
+	if err := cmd.RunE(cmd, []string{}); err != nil {
+		t.Fatalf("tollgate resume (not paused): error = %v", err)
+	}
+	if !strings.Contains(buf.String(), "not paused") {
+		t.Errorf("got %q, want output containing \"not paused\"", buf.String())
 	}
 }
 
