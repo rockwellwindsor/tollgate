@@ -54,8 +54,8 @@ func install(cmd *cobra.Command, srcDir string) error {
 		}
 	}
 
-	fmt.Fprintf(cmd.OutOrStdout(), "installed to %s\n", binDir)
-	fmt.Fprintf(cmd.OutOrStdout(), "add to your shell profile:\n  export PATH=\"%s:$PATH\"\n", binDir)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "installed to %s\n", binDir)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "add to your shell profile:\n  export PATH=\"%s:$PATH\"\n", binDir)
 	return nil
 }
 
@@ -64,14 +64,16 @@ func copyExe(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	defer in.Close()
+	defer func() { _ = in.Close() }()
 
 	out, err := os.OpenFile(dst, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0755)
 	if err != nil {
 		return err
 	}
-	defer out.Close()
 
-	_, err = io.Copy(out, in)
-	return err
+	if _, err = io.Copy(out, in); err != nil {
+		_ = out.Close()
+		return err
+	}
+	return out.Close()
 }
