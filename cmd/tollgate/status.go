@@ -30,9 +30,9 @@ func runStatusCmd(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 	if on {
-		fmt.Fprintln(cmd.OutOrStdout(), "tollgate: ENABLED")
+		_, _ = fmt.Fprintln(cmd.OutOrStdout(), "tollgate: ENABLED")
 	} else {
-		fmt.Fprintln(cmd.OutOrStdout(), "tollgate: DISABLED")
+		_, _ = fmt.Fprintln(cmd.OutOrStdout(), "tollgate: DISABLED")
 	}
 
 	paused, err := mgr.IsSessionPaused(os.Getpid())
@@ -40,7 +40,7 @@ func runStatusCmd(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 	if paused {
-		fmt.Fprintln(cmd.OutOrStdout(), "session: paused")
+		_, _ = fmt.Fprintln(cmd.OutOrStdout(), "session: paused")
 	}
 
 	patterns, err := mgr.AllowedPatterns(os.Getpid())
@@ -48,7 +48,7 @@ func runStatusCmd(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 	for _, p := range patterns {
-		fmt.Fprintf(cmd.OutOrStdout(), "session allow: %s\n", p)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "session allow: %s\n", p)
 	}
 
 	logPath := filepath.Join(dir, "audit.log")
