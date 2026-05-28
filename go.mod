@@ -1,6 +1,6 @@
 module github.com/rockwellwindsor/tollgate
 
-go 1.26.3
+go 1.24
 
 require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
