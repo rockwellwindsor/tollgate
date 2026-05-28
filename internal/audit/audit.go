@@ -44,7 +44,7 @@ func Read(path string) ([]Entry, error) {
 	for scanner.Scan() {
 		var e Entry
 		if err := json.Unmarshal(scanner.Bytes(), &e); err != nil {
-			return nil, err
+			continue
 		}
 		entries = append(entries, e)
 	}

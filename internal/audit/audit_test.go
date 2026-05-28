@@ -106,6 +106,33 @@ func TestRead_ReturnsParsedEntries(t *testing.T) {
 	}
 }
 
+func TestRead_SkipsCorruptedLines(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "audit.log")
+
+	good := Entry{Binary: "git", Args: []string{"push"}, Pattern: "git-push", Decision: "allowed-once"}
+	if err := Write(path, good); err != nil {
+		t.Fatalf("Write() error = %v", err)
+	}
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		t.Fatalf("open for append: %v", err)
+	}
+	fmt.Fprintln(f, "not valid json")
+	f.Close()
+	if err := Write(path, good); err != nil {
+		t.Fatalf("Write() error = %v", err)
+	}
+
+	got, err := Read(path)
+	if err != nil {
+		t.Fatalf("Read() error = %v (should skip bad lines, not fail)", err)
+	}
+	if len(got) != 2 {
+		t.Errorf("got %d entries, want 2 (malformed line should be skipped)", len(got))
+	}
+}
+
 func TestWrite_ConcurrentWritesProduceValidLines(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "audit.log")
