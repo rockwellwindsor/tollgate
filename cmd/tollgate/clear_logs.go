@@ -28,7 +28,7 @@ func runClearLogsCmd(cmd *cobra.Command, _ []string) error {
 	yes, _ := cmd.Flags().GetBool("yes")
 
 	if dryRun {
-		fmt.Fprintf(cmd.OutOrStdout(), "would delete: %s\n", logPath)
+		_, _ = fmt.Fprintf(cmd.OutOrStdout(), "would delete: %s\n", logPath)
 		return nil
 	}
 
@@ -36,7 +36,7 @@ func runClearLogsCmd(cmd *cobra.Command, _ []string) error {
 		return deleteLog(logPath)
 	}
 
-	fmt.Fprintf(cmd.OutOrStdout(), "delete %s? [y/N] ", logPath)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), "delete %s? [y/N] ", logPath)
 	buf := make([]byte, 1)
 	if _, err := cmd.InOrStdin().Read(buf); err != nil {
 		return err
